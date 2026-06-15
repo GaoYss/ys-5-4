@@ -12,7 +12,8 @@ const state = reactive({
   tiers: [],
   vouchers: [],
   transactions: [],
-  birthdayIssueResult: null
+  birthdayIssueResult: null,
+  birthdayStatus: null
 })
 
 async function run(action, successMessage = '') {
@@ -55,6 +56,13 @@ export function useLoyaltyData() {
   return {
     state,
     refreshAll,
+    async fetchBirthdayStatus() {
+      try {
+        state.birthdayStatus = await loyaltyApi.birthdayStatus()
+      } catch {
+        state.birthdayStatus = null
+      }
+    },
     async createMember(payload) {
       await run(() => loyaltyApi.createMember(payload), '会员已创建')
       await refreshAll()
@@ -71,6 +79,7 @@ export function useLoyaltyData() {
       const result = await run(() => loyaltyApi.issueBirthdayVouchers(), '生日礼券发放完成')
       state.birthdayIssueResult = result
       await refreshAll()
+      await this.fetchBirthdayStatus()
       return result
     }
   }

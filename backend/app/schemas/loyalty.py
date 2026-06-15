@@ -100,6 +100,12 @@ class SkippedMember(BaseModel):
     reason: str
 
 
+class BirthdayVoucherStatus(BaseModel):
+    total_birthday_members: int
+    already_issued_count: int
+    all_issued: bool
+
+
 class BirthdayVoucherIssueResult(BaseModel):
     issued: list[Voucher]
     skipped: list[SkippedMember]

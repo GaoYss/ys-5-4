@@ -92,6 +92,23 @@ class LoyaltyService:
         refreshed = self._refresh_member_tier({**member, "points": new_points})
         return {"member": refreshed, "transaction": tx, "message": f"已兑换 {gift['name']}"}
 
+    def get_birthday_voucher_status(self, today: date | None = None) -> dict:
+        today = today or date.today()
+        total = 0
+        already_issued = 0
+        for member in self.repo.list_members():
+            birthday = datetime.strptime(member["birthday"], "%Y-%m-%d").date()
+            if birthday.month != today.month or birthday.day != today.day:
+                continue
+            total += 1
+            if self.repo.birthday_voucher_exists(member["id"], today.year):
+                already_issued += 1
+        return {
+            "total_birthday_members": total,
+            "already_issued_count": already_issued,
+            "all_issued": total > 0 and already_issued == total,
+        }
+
     def issue_birthday_vouchers(self, today: date | None = None) -> dict:
         today = today or date.today()
         issued = []

@@ -11,5 +11,6 @@ export const loyaltyApi = {
   redeemGift: (payload) => http.post('/gifts/redeem', payload),
   tiers: () => http.get('/tiers'),
   vouchers: () => http.get('/vouchers'),
+  birthdayStatus: () => http.get('/vouchers/birthday/status'),
   issueBirthdayVouchers: () => http.post('/vouchers/birthday/issue', {})
 }
