@@ -78,6 +78,7 @@ class Voucher(BaseModel):
     status: str
     issued_at: str
     expires_at: str
+    is_new: bool | None = None
 
 
 class OperationResult(BaseModel):
@@ -112,3 +113,5 @@ class BirthdayVoucherIssueResult(BaseModel):
     issued_count: int
     skipped_count: int
     total_birthday_members: int
+    all_issued_today: list[Voucher]
+    all_issued: bool

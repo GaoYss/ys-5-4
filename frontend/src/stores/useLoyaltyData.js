@@ -78,8 +78,13 @@ export function useLoyaltyData() {
     async issueBirthdayVouchers() {
       const result = await run(() => loyaltyApi.issueBirthdayVouchers(), '生日礼券发放完成')
       state.birthdayIssueResult = result
+      state.birthdayStatus = {
+        total_birthday_members: result.total_birthday_members,
+        already_issued_count: result.all_issued_today.length,
+        all_issued: result.all_issued
+      }
       await refreshAll()
-      await this.fetchBirthdayStatus()
+      this.fetchBirthdayStatus()
       return result
     }
   }

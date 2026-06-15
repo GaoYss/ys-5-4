@@ -17,9 +17,9 @@ const buttonDisabled = computed(() => isSubmitting.value || allIssued.value || h
 
 const issueResult = computed(() => state.birthdayIssueResult)
 
-const isAllSkipped = computed(() => {
+const isAllDone = computed(() => {
   if (!issueResult.value) return false
-  return issueResult.value.total_birthday_members > 0 && issueResult.value.issued_count === 0 && issueResult.value.skipped_count > 0
+  return issueResult.value.all_issued === true
 })
 
 onMounted(async () => {
@@ -66,32 +66,37 @@ async function submitIssue() {
       </div>
     </div>
 
-    <div v-if="isAllSkipped" class="panel already-issued-notice">
+    <div v-if="issueResult && isAllDone" class="panel already-issued-notice">
       <h3 class="notice-title">今日生日礼券已发放完毕</h3>
-      <p>所有今日生日会员均已在本年度发放过生日礼券，无需重复操作。</p>
+      <p>所有 {{ issueResult.total_birthday_members }} 位今日生日会员均已在本年度发放过生日礼券，无需重复操作。</p>
     </div>
 
-    <div v-if="issueResult && !isAllSkipped && issueResult.issued.length > 0" class="panel issue-detail-panel success-panel">
-      <h3 class="success-title">✓ 已发放礼券</h3>
+    <div v-if="issueResult && issueResult.all_issued_today && issueResult.all_issued_today.length > 0" class="panel issue-detail-panel success-panel">
+      <h3 class="success-title">✓ 今日已发放礼券 <span class="subtitle-muted">（共 {{ issueResult.all_issued_today.length }} 张）</span></h3>
       <div class="data-table">
-        <div class="table-head voucher-cols">
+        <div class="table-head voucher-cols-6">
           <span>会员</span>
           <span>礼券</span>
           <span>内容</span>
           <span>有效期</span>
           <span>状态</span>
+          <span>批次</span>
         </div>
-        <div v-for="voucher in issueResult.issued" :key="voucher.id" class="table-row voucher-cols">
+        <div v-for="voucher in issueResult.all_issued_today" :key="voucher.id" class="table-row voucher-cols-6">
           <span>{{ voucher.member_name }}</span>
           <span>{{ voucher.title }}</span>
           <span>{{ voucher.value }}</span>
           <span>{{ voucher.expires_at }}</span>
           <span class="status-success">{{ voucher.status }}</span>
+          <span>
+            <span v-if="voucher.is_new" class="tag tag-new">本次新发</span>
+            <span v-else class="tag tag-old">此前已发</span>
+          </span>
         </div>
       </div>
     </div>
 
-    <div v-if="issueResult && !isAllSkipped && issueResult.skipped.length > 0" class="panel issue-detail-panel skipped-panel">
+    <div v-if="issueResult && !isAllDone && issueResult.skipped && issueResult.skipped.length > 0" class="panel issue-detail-panel skipped-panel">
       <h3 class="skipped-title">⊘ 已跳过会员</h3>
       <div class="data-table">
         <div class="table-head skipped-cols">
@@ -174,10 +179,6 @@ async function submitIssue() {
   color: #2e7d32;
 }
 
-.summary-item.done b {
-  color: #1b5e20;
-}
-
 .summary-item.success {
   background: #e8f5e9;
   color: #2e7d32;
@@ -228,6 +229,13 @@ async function submitIssue() {
   margin-top: 0;
 }
 
+.subtitle-muted {
+  color: #757575;
+  font-size: 14px;
+  font-weight: normal;
+  margin-left: 6px;
+}
+
 .skipped-title {
   color: #e65100;
   margin-top: 0;
@@ -242,8 +250,32 @@ async function submitIssue() {
   grid-template-columns: 1fr 2fr;
 }
 
+.voucher-cols-6 {
+  grid-template-columns: 1fr 1fr 2fr 1.2fr 0.8fr 1fr;
+}
+
 .skipped-reason {
   color: #e65100;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tag-new {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.tag-old {
+  background: #eceff1;
+  color: #546e7a;
+  border: 1px solid #cfd8dc;
 }
 
 .panel:first-of-type {

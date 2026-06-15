@@ -155,6 +155,23 @@ class LoyaltyRepository:
             ).fetchone()
             return row is not None
 
+    def get_birthday_voucher(self, member_id: int, year: int) -> dict | None:
+        with get_connection() as conn:
+            row = conn.execute(
+                """
+                SELECT v.*, m.name AS member_name
+                FROM vouchers v
+                JOIN members m ON m.id = v.member_id
+                WHERE v.member_id = ?
+                  AND v.title = '生日礼券'
+                  AND substr(v.issued_at, 1, 4) = ?
+                ORDER BY v.id DESC
+                LIMIT 1
+                """,
+                (member_id, str(year)),
+            ).fetchone()
+            return row_to_dict(row)
+
     def list_vouchers(self) -> list[dict]:
         with get_connection() as conn:
             rows = conn.execute(

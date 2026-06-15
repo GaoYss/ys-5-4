@@ -146,12 +146,24 @@ class LoyaltyService:
             voucher_with_name["member_name"] = member["name"]
             issued.append(voucher_with_name)
 
+        all_issued_today = []
+        for new_voucher in issued:
+            new_voucher["is_new"] = True
+            all_issued_today.append(new_voucher)
+        for skipped_member in skipped:
+            existing_voucher = self.repo.get_birthday_voucher(skipped_member["member_id"], today.year)
+            if existing_voucher is not None:
+                existing_voucher["is_new"] = False
+                all_issued_today.append(existing_voucher)
+
         return {
             "issued": issued,
             "skipped": skipped,
             "issued_count": len(issued),
             "skipped_count": len(skipped),
             "total_birthday_members": len(birthday_members),
+            "all_issued_today": all_issued_today,
+            "all_issued": len(birthday_members) > 0 and len(all_issued_today) == len(birthday_members),
         }
 
     def list_vouchers(self) -> list[dict]:
