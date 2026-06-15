@@ -92,14 +92,25 @@ class LoyaltyService:
         refreshed = self._refresh_member_tier({**member, "points": new_points})
         return {"member": refreshed, "transaction": tx, "message": f"已兑换 {gift['name']}"}
 
-    def issue_birthday_vouchers(self, today: date | None = None) -> list[dict]:
+    def issue_birthday_vouchers(self, today: date | None = None) -> dict:
         today = today or date.today()
         issued = []
+        skipped = []
+        birthday_members = []
+
         for member in self.repo.list_members():
             birthday = datetime.strptime(member["birthday"], "%Y-%m-%d").date()
             if birthday.month != today.month or birthday.day != today.day:
                 continue
+
+            birthday_members.append(member)
+
             if self.repo.birthday_voucher_exists(member["id"], today.year):
+                skipped.append({
+                    "member_id": member["id"],
+                    "member_name": member["name"],
+                    "reason": "本年度已发放生日礼券",
+                })
                 continue
 
             tier = self.repo.best_tier_for_points(member["points"])
@@ -114,8 +125,17 @@ class LoyaltyService:
             new_points = member["points"] + tier["birthday_bonus"]
             self.repo.update_member_points(member["id"], new_points)
             self.repo.add_transaction(member["id"], "birthday", tier["birthday_bonus"], "生日礼遇积分")
-            issued.append(voucher)
-        return issued
+            voucher_with_name = dict(voucher)
+            voucher_with_name["member_name"] = member["name"]
+            issued.append(voucher_with_name)
+
+        return {
+            "issued": issued,
+            "skipped": skipped,
+            "issued_count": len(issued),
+            "skipped_count": len(skipped),
+            "total_birthday_members": len(birthday_members),
+        }
 
     def list_vouchers(self) -> list[dict]:
         return self.repo.list_vouchers()

@@ -92,3 +92,17 @@ class Dashboard(BaseModel):
     total_points: int
     gifts_count: int
     active_vouchers: int
+
+
+class SkippedMember(BaseModel):
+    member_id: int
+    member_name: str
+    reason: str
+
+
+class BirthdayVoucherIssueResult(BaseModel):
+    issued: list[Voucher]
+    skipped: list[SkippedMember]
+    issued_count: int
+    skipped_count: int
+    total_birthday_members: int

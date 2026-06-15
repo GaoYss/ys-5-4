@@ -11,7 +11,8 @@ const state = reactive({
   gifts: [],
   tiers: [],
   vouchers: [],
-  transactions: []
+  transactions: [],
+  birthdayIssueResult: null
 })
 
 async function run(action, successMessage = '') {
@@ -67,9 +68,10 @@ export function useLoyaltyData() {
       await refreshAll()
     },
     async issueBirthdayVouchers() {
-      const vouchers = await run(() => loyaltyApi.issueBirthdayVouchers(), '生日礼券发放完成')
+      const result = await run(() => loyaltyApi.issueBirthdayVouchers(), '生日礼券发放完成')
+      state.birthdayIssueResult = result
       await refreshAll()
-      return vouchers
+      return result
     }
   }
 }
