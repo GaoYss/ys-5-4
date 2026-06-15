@@ -3,7 +3,7 @@ import { computed, onMounted } from 'vue'
 import StatusBanner from '../components/StatusBanner.vue'
 import { useLoyaltyData } from '../stores/useLoyaltyData'
 
-const { state, refreshAll, fetchBirthdayStatus, issueBirthdayVouchers } = useLoyaltyData()
+const { state, refreshAll, fetchBirthdayStatus, issueBirthdayVouchers, clearBirthdayIssueResult } = useLoyaltyData()
 
 const isSubmitting = computed(() => state.loading)
 
@@ -23,6 +23,7 @@ const isAllDone = computed(() => {
 })
 
 onMounted(async () => {
+  clearBirthdayIssueResult()
   await refreshAll()
   await fetchBirthdayStatus()
 })

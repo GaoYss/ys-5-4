@@ -56,6 +56,9 @@ export function useLoyaltyData() {
   return {
     state,
     refreshAll,
+    clearBirthdayIssueResult() {
+      state.birthdayIssueResult = null
+    },
     async fetchBirthdayStatus() {
       try {
         state.birthdayStatus = await loyaltyApi.birthdayStatus()
